@@ -1,0 +1,23 @@
+name "motion_controller"
+version "0.1"
+
+using_library "motion_controller"
+
+import_types_from "base"
+import_types_from "trajectory_follower/Motion2D.hpp"
+import_types_from "motion_controller/MotionControllerTypes.hpp"
+import_types_from "motion_controllerTypes.hpp"
+
+task_context "Task" do
+    needs_configuration
+
+    property("geometry", "/motion_controller/Geometry").
+        doc("Geometrical information")
+
+    input_port('motion_command', '/base/MotionCommand2D').
+        doc("Drive command that should steer the robot to the target pose")
+
+    output_port('actuators_command', '/base/commands/Joints')
+
+    periodic 0.01
+end
