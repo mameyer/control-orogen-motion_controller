@@ -1,0 +1,61 @@
+--- name:default
+# no documentation available for this property
+actuators:
+  - name: "frontLeft_wheel"
+    type: :WheelFrontLeft
+    #position:
+    #  data:
+    #  - 0.96
+    #  - 0.58
+  - name: "frontRight_wheel"
+    type: :WheelFrontRight
+    #position:
+    #  data:
+    #  - 0.96
+    #  - -0.58
+  - name: "rearLeft_wheel"
+    type: :WheelRearLeft
+    #position:
+    #  data:
+    #  - -0.96
+    #  - 0.58
+  - name: "rearRight_wheel"
+    type: :WheelRearRight
+    #position:
+    #  data:
+    #  - -0.96
+    #  - -0.58
+# Geometrical information
+geometry:
+  axleTrack: 1.350
+  wheelbase: 1.900
+  wheelOffset: 0.0
+  scrubRadius: 0.0915
+  wheelRadius: 0.325
+  wheelMaxVel: 0.0
+# no documentation available for this property
+joint_commands:
+  - actuator: "frontLeft_wheel"
+    type: :Position
+    name: "link_wheel_fl_rot"
+  - actuator: "frontRight_wheel"
+    type: :Position
+    name: "link_wheel_fr_rot"
+  - actuator: "rearLeft_wheel"
+    type: :Position
+    name: "link_wheel_rl_rot"
+  - actuator: "rearRight_wheel"
+    type: :Position
+    name: "link_wheel_rr_rot"
+  - actuator: "frontLeft_wheel"
+    type: :Speed
+    name: "link_wheel_fl"
+  - actuator: "frontRight_wheel"
+    type: :Speed
+    name: "link_wheel_fr"
+  - actuator: "rearLeft_wheel"
+    type: :Speed
+    name: "link_wheel_rl"
+  - actuator: "rearRight_wheel"
+    type: :Speed
+    name: "link_wheel_rr"

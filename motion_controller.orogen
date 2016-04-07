@@ -11,13 +11,25 @@ import_types_from "motion_controllerTypes.hpp"
 task_context "Task" do
     needs_configuration
 
-    property("geometry", "/motion_controller/Geometry").
+    property('geometry', '/motion_controller/Geometry').
         doc("Geometrical information")
+        
+    property('actuators', '/std/vector</motion_controller/Actuator')
+    
+    property('joint_commands', '/std/vector</motion_controller/JointCommand')
 
-    input_port('motion_command', '/base/MotionCommand2D').
+    input_port('motion_command', '/trajectory_follower/Motion2D').
         doc("Drive command that should steer the robot to the target pose")
 
     output_port('actuators_command', '/base/commands/Joints')
+    
+    output_port('drive_mode', '/motion_controller/DriveMode')
+    
+    output_port('wheel_debug', 'std/vector</base/Waypoint>')
+    
+    output_port('ackermann_turning_center', '/base/Waypoint')
 
-    periodic 0.01
+    port_driven 'motion_command'
+    
+    runtime_states "EXEC_LATERAL", "EXEC_ACKERMANN"
 end
