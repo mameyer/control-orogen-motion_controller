@@ -17,6 +17,8 @@ task_context "Task" do
     property('actuators', '/std/vector</motion_controller/Actuator')
     
     property('joint_commands', '/std/vector</motion_controller/JointCommand')
+    
+    property('ackermann_ratio', 'double')
 
     input_port('motion_command', '/trajectory_follower/Motion2D').
         doc("Drive command that should steer the robot to the target pose")
@@ -31,5 +33,5 @@ task_context "Task" do
 
     port_driven 'motion_command'
     
-    runtime_states "EXEC_LATERAL", "EXEC_ACKERMANN"
+    runtime_states "EXEC_LATERAL", "EXEC_ACKERMANN", "EXEC_TURN_ON_SPOT"
 end

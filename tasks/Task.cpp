@@ -63,6 +63,12 @@ bool Task::configureHook()
 
     ackermannController = new Ackermann(geometry, controllerBase);
     lateralController = new Lateral(geometry, controllerBase);
+    pointTurnController = new PointTurn(geometry, controllerBase);
+
+    if (_ackermann_ratio.get() >= 0 && _ackermann_ratio.get() <= 1)
+    {
+        ackermannController->setAckermannRatio(_ackermann_ratio.get());
+    }
 
     return true;
 }
@@ -80,26 +86,42 @@ void Task::updateHook()
 
     trajectory_follower::Motion2D motionCommand;
     if (_motion_command.read(motionCommand) == RTT::NewData) {
-        const base::samples::Joints& actuators_command(ackermannController->compute(motionCommand));
-        _actuators_command.write(actuators_command);
-        state(EXEC_ACKERMANN);
-        
+        if (motionCommand.translation == 0 && motionCommand.rotation != 0)
+        {
+            const base::samples::Joints& actuators_command(pointTurnController->compute(motionCommand));
+            _actuators_command.write(actuators_command);
+            state(EXEC_TURN_ON_SPOT);
+        }
+        else
+        {
+            const base::samples::Joints& actuators_command(ackermannController->compute(motionCommand));
+            _actuators_command.write(actuators_command);
+            state(EXEC_ACKERMANN);
+        }
+
         std::vector<base::Waypoint> wheelsDebug;
         for (auto jointActuator: controllerBase->getJointActuators())
         {
             JointCmd* positionCmd = jointActuator->getJointCmdForType(JointCmdType::Position);
+            JointCmd* steeringCmd = jointActuator->getJointCmdForType(JointCmdType::Speed);
+
             base::JointState &jointState(controllerBase->getJoints()[controllerBase->getJoints().mapNameToIndex(positionCmd->getName())]);
-            base::Waypoint wheelOut;
+            base::JointState &steeringJointState(controllerBase->getJoints()[controllerBase->getJoints().mapNameToIndex(steeringCmd->getName())]);
+
+            base::Waypoint wheelOut, wheelSteeringOut;
             auto pos = jointActuator->getPosition();
             wheelOut.position.x() = pos.x();
             wheelOut.position.y() = pos.y();
             wheelOut.position.z() = 0.;
             wheelOut.heading = jointState.position;
+            wheelSteeringOut.position = wheelOut.position;
+            wheelSteeringOut.heading = (steeringJointState.speed > 0) ? 0 : M_PI;
             wheelsDebug.push_back(wheelOut);
+            //wheelsDebug.push_back(wheelSteeringOut);
         }
-        
+
         _wheel_debug.write(wheelsDebug);
-        
+
         base::Waypoint ackermannTurningCenter;
         auto turningCenter = ackermannController->getTurningCenter();
         ackermannTurningCenter.position.x() = turningCenter.x();

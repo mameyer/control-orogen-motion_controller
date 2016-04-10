@@ -6,6 +6,7 @@
 #include "motion_controller/TaskBase.hpp"
 #include <motion_controller/Ackermann.hpp>
 #include <motion_controller/Lateral.hpp>
+#include <motion_controller/PointTurn.hpp>
 #include <motion_controller/Controller.hpp>
 
 namespace motion_controller {
@@ -34,6 +35,8 @@ tasks/Task.cpp, and will be put in the motion_controller namespace.
         ControllerBase *controllerBase;
         Ackermann *ackermannController;
         Lateral *lateralController;
+        PointTurn *pointTurnController;
+        
         std::map< std::string, JointActuator* > jointActuators;
 
     public:

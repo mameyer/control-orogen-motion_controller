@@ -1,0 +1,62 @@
+--- name:default
+# no documentation available for this property
+actuators:
+  - name: "frontLeft_wheel"
+    type: :WheelFrontLeft
+  - name: "frontRight_wheel"
+    type: :WheelFrontRight
+  - name: "rearLeft_wheel"
+    type: :WheelRearLeft
+  - name: "rearRight_wheel"
+    type: :WheelRearRight
+  - name: "midLeft_wheel"
+    type: :WheelMidLeft
+  - name: "midRight_wheel"
+    type: :WheelMidRight
+# Geometrical information
+geometry:
+  axleTrack: 0.5689
+  wheelbase: 0.73485
+  wheelOffset: 0.24495
+  scrubRadius: 0.09
+  wheelRadius: 0.135
+  wheelMaxVel: 0.0
+ackermann_ratio: 1
+# no documentation available for this property
+joint_commands:
+  - actuator: "frontLeft_wheel"
+    type: :Position
+    name: "front_left_turn"
+  - actuator: "frontLeft_wheel"
+    type: :Speed
+    name: "front_left"
+  - actuator: "frontRight_wheel"
+    type: :Speed
+    name: "front_right"
+  - actuator: "midLeft_wheel"
+    type: :Speed
+    name: "middle_left"
+  - actuator: "midRight_wheel"
+    type: :Speed
+    name: "middle_right"
+  - actuator: "rearLeft_wheel"
+    type: :Speed
+    name: "rear_left"
+  - actuator: "rearRight_wheel"
+    type: :Speed
+    name: "rear_right"
+  - actuator: "frontRight_wheel"
+    type: :Position
+    name: "front_right_turn"
+  - actuator: "midLeft_wheel"
+    type: :Position
+    name: "middle_left_turn"
+  - actuator: "midRight_wheel"
+    type: :Position
+    name: "middle_right_turn"
+  - actuator: "rearLeft_wheel"
+    type: :Position
+    name: "rear_left_turn"
+  - actuator: "rearRight_wheel"
+    type: :Position
+    name: "rear_right_turn"
