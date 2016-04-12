@@ -117,7 +117,7 @@ void Task::updateHook()
             wheelSteeringOut.position = wheelOut.position;
             wheelSteeringOut.heading = (steeringJointState.speed > 0) ? 0 : M_PI;
             wheelsDebug.push_back(wheelOut);
-            //wheelsDebug.push_back(wheelSteeringOut);
+            wheelsDebug.push_back(wheelSteeringOut);
         }
 
         _wheel_debug.write(wheelsDebug);

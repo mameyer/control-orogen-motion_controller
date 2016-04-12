@@ -8,8 +8,8 @@ Orocos.initialize
 
 Orocos.run 'motion_controller::Task' => 'motion_controller', :valgrind => false, :gdb => false do
     motion_controller = Orocos.name_service.get 'motion_controller'
-    motion_controller.apply_conf_file("#{ENV['AUTOPROJ_CURRENT_ROOT']}/bundles/eo2/config/orogen/motion_controller::Task.yml", ['default'])
-    #motion_controller.apply_conf_file("../config/spacebot-motion_controller::Task.yml", ['default'])
+    #motion_controller.apply_conf_file("#{ENV['AUTOPROJ_CURRENT_ROOT']}/bundles/eo2/config/orogen/motion_controller::Task.yml", ['default'])
+    motion_controller.apply_conf_file("../config/spacebot-motion_controller::Task.yml", ['default'])
       
     motion_controller.configure
     motion_controller.start

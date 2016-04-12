@@ -21,7 +21,7 @@ geometry:
   scrubRadius: 0.09
   wheelRadius: 0.135
   wheelMaxVel: 0.0
-ackermann_ratio: 1
+ackermann_ratio: 0.66
 # no documentation available for this property
 joint_commands:
   - actuator: "frontLeft_wheel"
