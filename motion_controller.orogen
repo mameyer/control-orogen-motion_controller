@@ -19,9 +19,14 @@ task_context "Task" do
     property('joint_commands', '/std/vector</motion_controller/JointCommand')
     
     property('ackermann_ratio', 'double')
+    
+    property('max_rotation_angle', 'double')
 
     input_port('motion_command', '/trajectory_follower/Motion2D').
         doc("Drive command that should steer the robot to the target pose")
+        
+    input_port('actuators_status', '/base/samples/Joints').
+        doc("Current state (current, position ...) of the actuators.")
 
     output_port('actuators_command', '/base/commands/Joints')
     

@@ -34,6 +34,14 @@ bool Task::configureHook()
     Geometry geometry = _geometry.get();
 
     controllerBase = new ControllerBase();
+    
+    double maxRotationAngle =  _max_rotation_angle.get();
+    if (maxRotationAngle < 0.)
+    {
+        maxRotationAngle = M_PI;
+    }
+    
+    controllerBase->setMaxRotationAngle(maxRotationAngle);
 
     std::cout << "actuators.. " << std::endl;
     for (auto actuator: _actuators.get())
@@ -68,6 +76,7 @@ bool Task::configureHook()
     if (_ackermann_ratio.get() >= 0 && _ackermann_ratio.get() <= 1)
     {
         ackermannController->setAckermannRatio(_ackermann_ratio.get());
+        pointTurnController->setAckermannRatio(_ackermann_ratio.get());
     }
 
     return true;
@@ -83,10 +92,16 @@ bool Task::startHook()
 void Task::updateHook()
 {
     TaskBase::updateHook();
+    
+    base::samples::Joints joints;
+    if(_actuators_status.read(joints) == RTT::NewData)
+    {
+        
+    }
 
     trajectory_follower::Motion2D motionCommand;
     if (_motion_command.read(motionCommand) == RTT::NewData) {
-        if (motionCommand.translation == 0 && motionCommand.rotation != 0)
+        if (motionCommand.translation == 0 && motionCommand.rotation != 0) 
         {
             const base::samples::Joints& actuators_command(pointTurnController->compute(motionCommand));
             _actuators_command.write(actuators_command);
@@ -94,9 +109,18 @@ void Task::updateHook()
         }
         else
         {
-            const base::samples::Joints& actuators_command(ackermannController->compute(motionCommand));
-            _actuators_command.write(actuators_command);
-            state(EXEC_ACKERMANN);
+            try
+            {
+                const base::samples::Joints& actuators_command(ackermannController->compute(motionCommand));
+                _actuators_command.write(actuators_command);
+                state(EXEC_ACKERMANN);
+            }
+            catch (...)
+            {
+                const base::samples::Joints& actuators_command(pointTurnController->compute(motionCommand));
+                _actuators_command.write(actuators_command);
+                state(EXEC_TURN_ON_SPOT);
+            }
         }
 
         std::vector<base::Waypoint> wheelsDebug;

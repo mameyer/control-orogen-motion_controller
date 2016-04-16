@@ -50,7 +50,7 @@ Orocos.run 	'motion_controller::Task' => 'motion_controller',
 
 
     bogieDispatcher = Orocos.name_service.get 'bogie_dispatcher'
-    bogieFront.apply_conf_file("#{ENV['AUTOPROJ_CURRENT_ROOT']}/bundles/spacebot/config/orogen/joint_dispatcher::Task.yml", ['default', 'bogies'])
+    bogieDispatcher.apply_conf_file("#{ENV['AUTOPROJ_CURRENT_ROOT']}/bundles/spacebot/config/orogen/joint_dispatcher::Task.yml", ['default', 'bogies'])
     puts "bogieDispatcher.configure.."
     bogieDispatcher.configure
 
