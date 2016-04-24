@@ -37,6 +37,8 @@ tasks/Task.cpp, and will be put in the motion_controller namespace.
         Lateral *lateralController;
         PointTurn *pointTurnController;
         
+        base::samples::Joints actuatorsCommand;
+        
         std::map< std::string, JointActuator* > jointActuators;
 
     public:
