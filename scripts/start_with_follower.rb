@@ -31,7 +31,10 @@ def setupTask
     drive_mode_controller               = getTask('motion_controller', @allTasks)
     joints                              = getTask('joints', @allTasks)
     perfect_odometry                    = getTask('perfect_odometry', @allTasks)
-    follower 				= getTask('trajectory_follower',@allTasks)
+    follower 							= getTask('trajectory_follower',@allTasks)
+    velodyne 							= getTask('velodyne',@allTasks)
+    slam                                = getTask('slam', @allTasks)
+    pose_provider                       = getTask('pose_provider', @allTasks)
 
     #####################################################################
     # Set configuration
@@ -61,6 +64,12 @@ def setupTask
 
     drive_mode_controller.actuators_command.connect_to joints.command
     follower.motion_command.connect_to drive_mode_controller.motion_command
+
+    velodyne.pointcloud.connect_to slam.simulated_pointcloud
+    perfect_odometry.pose_samples.connect_to slam.odometry_samples, :type => :buffer, :size => 10
+    perfect_odometry.pose_samples.connect_to pose_provider.odometry_samples, :type => :buffer, :size => 10
+    pose_provider.pose_samples.connect_to follower.robot_pose
+    slam.pose_provider_update.connect_to pose_provider.pose_provider_update
         
     #####################################################################
     # starting the task
@@ -85,9 +94,11 @@ ENV['LC_NUMERIC'] = 'C'
 Bundles.run 'eo2_sim',
             'motion_controller::Task' => 'motion_controller',
             'trajectory_follower::Task' => 'trajectory_follower',
+            'graph_slam::VelodyneSLAM' => 'slam',
+            'localization::PoseProvider' => 'pose_provider',
             "wait" => 1000 do
 
-    #Orocos.log_all_ports()
+    Orocos.log_all
         
     mars_simulation = Orocos::TaskContext.get("mars_simulation")
     Orocos.conf.apply( mars_simulation, ['default'] )
