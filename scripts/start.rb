@@ -28,9 +28,12 @@ def setupTask
     #####################################################################
     puts "GET NAME SERVICES"
     
-    drive_mode_controller               = getTask('motion_controller', @allTasks)
-    joints                              = getTask('joints', @allTasks)
-    perfect_odometry                    = getTask('perfect_odometry', @allTasks)
+    motion_controller                   = getTask('motion_controller', @allTasks)
+    bogie_front                         = getTask('bogie_front_task', @allTasks)
+    bogie_left                          = getTask('bogie_left_task', @allTasks)
+    bogie_right                         = getTask('bogie_right_task', @allTasks)
+    bogie_dispatcher                    = getTask('bogie_dispatcher', @allTasks)
+
 
     #####################################################################
     # Set configuration
@@ -58,7 +61,7 @@ def setupTask
     #####################################################################
     puts "CONNECT PORTS"
 
-    drive_mode_controller.actuators_command.connect_to joints.command
+    #motion_controller.actuators_command.connect_to joints.command
         
     #####################################################################
     # starting the task
@@ -80,7 +83,7 @@ end
 ENV['LANG'] = 'C'
 ENV['LC_NUMERIC'] = 'C'
 
-Bundles.run 'eo2_sim',
+Bundles.run 'spacebot_simulation',
             'motion_controller::Task' => 'motion_controller',
             "wait" => 1000 do
 
@@ -92,7 +95,8 @@ Bundles.run 'eo2_sim',
     mars_simulation.start()
 
     # Has to be called after configure.
-    mars_simulation.loadScene('../../../../models/robots/eo2/smurf/eo2.smurf')
-    mars_simulation.loadScene('../../../../models/terrains/spacebot_cup_building.smurfs')
+    mars_simulation.loadScene('../../../../simulation/models/robots/artemis/smurf/artemis.smurf')
+    mars_simulation.loadScene('../../../../simulation/models/terrains/spacebot_cup_building/spacebot_cup_building.smurfs')
+
     setupTask()
 end
