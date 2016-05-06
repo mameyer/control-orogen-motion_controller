@@ -35,13 +35,15 @@ def setupTask
     serialBogieRight = getTask( 'serial_bogie_right_task', @allTasks )
 
     bogieFront = getTask( 'bogie_front_task', @allTasks )
-    bogieLeft = getTask( 'bogie_left_task', @allTaks )
+    bogieLeft = getTask( 'bogie_left_task', @allTasks )
     bogieRight = getTask( 'bogie_right_task', @allTasks )
 
     bogieDispatcher = getTask( 'bogie_dispatcher', @allTasks )
 
     motion_controller = getTask( 'motion_controller', @allTasks )
     follower = getTask( 'trajectory_follower', @allTasks )
+
+    odometry = getTask( 'odometry', @allTasks )
 
     xsens = getTask( 'xsens', @allTasks )
 
@@ -89,15 +91,16 @@ def setupTask
     serialBogieRight.ndlcom_message_out.connect_to bogieRight.ndlcom_message_in, :type => :buffer, :size => 40
     bogieRight.ndlcom_message_out.connect_to serialBogieRight.ndlcom_message_in, :type => :buffer, :size => 40
 
-    frontBogie.status_samples.connect_to bogieDispatcher.bogie_front, :type => :buffer, :size => 200
-    leftBogie.status_samples.connect_to bogieDispatcher.bogie_left, :type => :buffer, :size => 200
-    rightBogie.status_samples.connect_to bogieDispatcher.bogie_right, :type => :buffer, :size => 200
+    bogieFront.joints_status.connect_to bogieDispatcher.bogie_front, :type => :buffer, :size => 200
+    bogieLeft.joints_status.connect_to bogieDispatcher.bogie_left, :type => :buffer, :size => 200
+    bogieRight.joints_status.connect_to bogieDispatcher.bogie_right, :type => :buffer, :size => 200
 
-    motion_controller.actuators_command.connect_to frontBogie.command
-    motion_controller.actuators_command.connect_to leftBogie.command
-    motion_controller.actuators_command.connect_to rightBogie.command
+    motion_controller.actuators_command.connect_to bogieFront.joints_command
+    motion_controller.actuators_command.connect_to bogieLeft.joints_command
+    motion_controller.actuators_command.connect_to bogieRight.joints_command
 
-    bogieDispatcher.motion_status.connect_to motion_controller.actuators_status   
+    bogieDispatcher.motion_status.connect_to motion_controller.actuators_status
+    bogieDispatcher.motion_status.connect_to odometry.actuator_samples, :type => :buffer, :size => 200
  
     #####################################################################
     # starting the task
