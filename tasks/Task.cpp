@@ -70,15 +70,13 @@ bool Task::configureHook()
     }
     
     controllerBase->resetAllJoints(actuatorsCommand);
+    controllerBase->resetAllJoints(actuatorsFeedback);
 
-    ackermannController = new Ackermann(geometry, controllerBase);
-    lateralController = new Lateral(geometry, controllerBase);
-    pointTurnController = new PointTurn(geometry, controllerBase);
+    motion_control_dispatcher = new Dispatcher(geometry, controllerBase, _use_joints_feedback);
 
     if (_ackermann_ratio.get() >= 0 && _ackermann_ratio.get() <= 1)
     {
-        ackermannController->setAckermannRatio(_ackermann_ratio.get());
-        pointTurnController->setAckermannRatio(_ackermann_ratio.get());
+        motion_control_dispatcher->setAckermannRatio(_ackermann_ratio.get());
     }
 
     return true;
@@ -98,35 +96,16 @@ void Task::updateHook()
     base::samples::Joints joints;
     if(_actuators_status.read(joints) == RTT::NewData)
     {
-        
+        actuatorsFeedback = joints;
     }
-
+    
+    
     trajectory_follower::Motion2D motionCommand;
-    if (_motion_command.read(motionCommand) == RTT::NewData) {
-        if (motionCommand.translation == 0 && motionCommand.rotation != 0) 
-        {
-            pointTurnController->compute(motionCommand, actuatorsCommand);
-            state(EXEC_TURN_ON_SPOT);
-        }
-        else if (motionCommand.rotation == 0)
-        {
-            lateralController->compute(motionCommand, actuatorsCommand);
-            state(EXEC_LATERAL);
-        }
-        else
-        {
-            if (ackermannController->compute(motionCommand, actuatorsCommand))
-            {
-                state(EXEC_ACKERMANN);
-            }
-            else
-            {
-                pointTurnController->compute(motionCommand, actuatorsCommand);
-                state(EXEC_TURN_ON_SPOT);
-            }
-        }
+    
+    if(_motion_command.read(motionCommand) == RTT::NewData){
+        motion_control_dispatcher->compute(motionCommand, actuatorsCommand, actuatorsFeedback);
         _actuators_command.write(actuatorsCommand);
-
+        state(EXEC_TURN_ON_SPOT);
         std::vector<base::Waypoint> wheelsDebug;
         for (auto jointActuator: controllerBase->getJointActuators())
         {
@@ -149,13 +128,8 @@ void Task::updateHook()
         }
 
         _wheel_debug.write(wheelsDebug);
-
-        base::Waypoint ackermannTurningCenter;
-        auto turningCenter = ackermannController->getTurningCenter();
-        ackermannTurningCenter.position.x() = turningCenter.x();
-        ackermannTurningCenter.position.y() = turningCenter.y();
-        ackermannTurningCenter.position.z() = 0.;
-        _ackermann_turning_center.write(ackermannTurningCenter);
+    }else{
+        state(IDLE);
     }
 }
 
@@ -171,5 +145,6 @@ void Task::stopHook()
 
 void Task::cleanupHook()
 {
+    delete motion_control_dispatcher;
     TaskBase::cleanupHook();
 }

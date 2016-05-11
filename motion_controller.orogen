@@ -21,6 +21,8 @@ task_context "Task" do
     property('ackermann_ratio', 'double')
     
     property('max_rotation_angle', 'double')
+    
+    property('use_joints_feedback', 'bool')
 
     input_port('motion_command', '/trajectory_follower/Motion2D').
         doc("Drive command that should steer the robot to the target pose")
@@ -38,5 +40,5 @@ task_context "Task" do
 
     port_driven 'motion_command'
     
-    runtime_states "EXEC_LATERAL", "EXEC_ACKERMANN", "EXEC_TURN_ON_SPOT"
+    runtime_states "EXEC_LATERAL", "EXEC_ACKERMANN", "EXEC_TURN_ON_SPOT", "IDLE"
 end
