@@ -72,11 +72,11 @@ bool Task::configureHook()
     controllerBase->resetAllJoints(actuatorsCommand);
     controllerBase->resetAllJoints(actuatorsFeedback);
 
-    motion_control_dispatcher = new Dispatcher(geometry, controllerBase, _use_joints_feedback);
+    motionControlDispatcher = new Dispatcher(geometry, controllerBase, _use_joints_feedback);
 
     if (_ackermann_ratio.get() >= 0 && _ackermann_ratio.get() <= 1)
     {
-        motion_control_dispatcher->setAckermannRatio(_ackermann_ratio.get());
+        motionControlDispatcher->setAckermannRatio(_ackermann_ratio.get());
     }
 
     return true;
@@ -93,19 +93,43 @@ void Task::updateHook()
 {
     TaskBase::updateHook();
     
-    base::samples::Joints joints;
-    if(_actuators_status.read(joints) == RTT::NewData)
+    if(_actuators_status.read(actuatorsFeedback) == RTT::NewData)
     {
-        actuatorsFeedback = joints;
+        if (_use_joints_feedback)
+        {
+            state(MISSING_JOINTS_FEEDBACK);
+            controllerBase->resetAllJoints(actuatorsCommand);
+            _actuators_command.write(actuatorsCommand);
+        }
     }
-    
     
     trajectory_follower::Motion2D motionCommand;
     
-    if(_motion_command.read(motionCommand) == RTT::NewData){
-        motion_control_dispatcher->compute(motionCommand, actuatorsCommand, actuatorsFeedback);
+    if(_motion_command.read(motionCommand) == RTT::NewData)
+    {
+        motionControlDispatcher->compute(motionCommand, actuatorsCommand, actuatorsFeedback);
         _actuators_command.write(actuatorsCommand);
+        
+        switch (motionControlDispatcher->getCurrentMode())
+        {
+            case ModeAckermann:
+                state(EXEC_ACKERMANN);
+                break;
+            
+            case ModeTurnOnSpot:
+                state(EXEC_TURN_ON_SPOT);
+                break;
+                
+            case ModeLateral:
+                state(EXEC_LATERAL);
+                break;
+                
+            default:
+                state(IDLE);
+                break;
+        }
         state(EXEC_TURN_ON_SPOT);
+        
         std::vector<base::Waypoint> wheelsDebug;
         for (auto jointActuator: controllerBase->getJointActuators())
         {
@@ -128,8 +152,13 @@ void Task::updateHook()
         }
 
         _wheel_debug.write(wheelsDebug);
-    }else{
-        state(IDLE);
+        
+        base::Waypoint ackermannTurningCenter;
+        auto turningCenter = motionControlDispatcher->getAckermannController()->getTurningCenter();
+        ackermannTurningCenter.position.x() = turningCenter.x();
+        ackermannTurningCenter.position.y() = turningCenter.y();
+        ackermannTurningCenter.position.z() = 0.;
+        _ackermann_turning_center.write(ackermannTurningCenter);
     }
 }
 
@@ -145,6 +174,6 @@ void Task::stopHook()
 
 void Task::cleanupHook()
 {
-    delete motion_control_dispatcher;
+    delete motionControlDispatcher;
     TaskBase::cleanupHook();
 }

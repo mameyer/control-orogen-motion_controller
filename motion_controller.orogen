@@ -41,4 +41,5 @@ task_context "Task" do
     port_driven 'motion_command'
     
     runtime_states "EXEC_LATERAL", "EXEC_ACKERMANN", "EXEC_TURN_ON_SPOT", "IDLE"
+    error_states "MISSING_JOINTS_FEEDBACK"
 end

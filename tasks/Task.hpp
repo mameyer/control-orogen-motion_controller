@@ -31,7 +31,7 @@ tasks/Task.cpp, and will be put in the motion_controller namespace.
 	friend class TaskBase;
     protected:
         ControllerBase *controllerBase;
-        Dispatcher *motion_control_dispatcher;
+        Dispatcher *motionControlDispatcher;
        
         base::samples::Joints actuatorsCommand, actuatorsFeedback;
         std::map< std::string, JointActuator* > jointActuators;
