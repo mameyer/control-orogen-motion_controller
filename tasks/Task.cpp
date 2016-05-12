@@ -93,13 +93,14 @@ void Task::updateHook()
 {
     TaskBase::updateHook();
     
-    if(_actuators_status.read(actuatorsFeedback) == RTT::NewData)
+    if(_use_joints_feedback)
     {
-        if (_use_joints_feedback)
+        if (!_actuators_status.read(actuatorsFeedback) == RTT::NewData)
         {
             state(MISSING_JOINTS_FEEDBACK);
             controllerBase->resetAllJoints(actuatorsCommand);
             _actuators_command.write(actuatorsCommand);
+            return;
         }
     }
     
@@ -128,7 +129,20 @@ void Task::updateHook()
                 state(IDLE);
                 break;
         }
-        state(EXEC_TURN_ON_SPOT);
+        
+        switch (motionControlDispatcher->getStatus())
+        {
+            case TooFast:
+                state(TOO_FAST);
+                break;
+                
+            case NeedsToWaitForTurn:
+                state(NEEDS_WAIT_FOR_TURN);
+                break;
+                
+            default:
+                break;
+        }
         
         std::vector<base::Waypoint> wheelsDebug;
         for (auto jointActuator: controllerBase->getJointActuators())
