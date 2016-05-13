@@ -35,6 +35,8 @@ tasks/Task.cpp, and will be put in the motion_controller namespace.
        
         base::samples::Joints actuatorsCommand, actuatorsFeedback;
         std::map< std::string, JointActuator* > jointActuators;
+        trajectory_follower::Motion2D zeroCommand = trajectory_follower::Motion2D(0,0,0);
+        trajectory_follower::Motion2D lastCommand = zeroCommand;
 
     public:
         /** TaskContext constructor for Task

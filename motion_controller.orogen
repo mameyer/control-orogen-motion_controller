@@ -38,7 +38,7 @@ task_context "Task" do
     
     output_port('ackermann_turning_center', '/base/Waypoint')
 
-    port_driven 'motion_command'
+    periodic 0.01
     
     runtime_states "EXEC_LATERAL", "EXEC_ACKERMANN", "EXEC_TURN_ON_SPOT", "IDLE", "TOO_FAST", "NEEDS_WAIT_FOR_TURN"
     error_states "MISSING_JOINTS_FEEDBACK"

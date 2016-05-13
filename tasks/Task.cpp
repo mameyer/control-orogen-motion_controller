@@ -92,13 +92,14 @@ bool Task::startHook()
 void Task::updateHook()
 {
     TaskBase::updateHook();
+    controllerBase->resetAllJoints(actuatorsCommand);
+    
     
     if(_use_joints_feedback)
     {
         if (!_actuators_status.read(actuatorsFeedback) == RTT::NewData)
         {
             state(MISSING_JOINTS_FEEDBACK);
-            controllerBase->resetAllJoints(actuatorsCommand);
             _actuators_command.write(actuatorsCommand);
             return;
         }
@@ -106,74 +107,81 @@ void Task::updateHook()
     
     trajectory_follower::Motion2D motionCommand;
     
-    if(_motion_command.read(motionCommand) == RTT::NewData)
-    {
-        motionControlDispatcher->compute(motionCommand, actuatorsCommand, actuatorsFeedback);
-        _actuators_command.write(actuatorsCommand);
-        
-        switch (motionControlDispatcher->getCurrentMode())
-        {
-            case ModeAckermann:
-                state(EXEC_ACKERMANN);
-                break;
-            
-            case ModeTurnOnSpot:
-                state(EXEC_TURN_ON_SPOT);
-                break;
-                
-            case ModeLateral:
-                state(EXEC_LATERAL);
-                break;
-                
-            default:
-                state(IDLE);
-                break;
+    if(_motion_command.read(motionCommand) == RTT::NewData){   
+        lastCommand = motionCommand;
+    }else{
+        if(lastCommand == zeroCommand){
+            motionCommand = zeroCommand;
+        }else{
+            motionCommand = lastCommand;        //TODO: Timeout
         }
-        
-        switch (motionControlDispatcher->getStatus())
-        {
-            case TooFast:
-                state(TOO_FAST);
-                break;
-                
-            case NeedsToWaitForTurn:
-                state(NEEDS_WAIT_FOR_TURN);
-                break;
-                
-            default:
-                break;
-        }
-        
-        std::vector<base::Waypoint> wheelsDebug;
-        for (auto jointActuator: controllerBase->getJointActuators())
-        {
-            JointCmd* positionCmd = jointActuator->getJointCmdForType(JointCmdType::Position);
-            JointCmd* steeringCmd = jointActuator->getJointCmdForType(JointCmdType::Speed);
-
-            base::JointState &jointState(actuatorsCommand[actuatorsCommand.mapNameToIndex(positionCmd->getName())]);
-            base::JointState &steeringJointState(actuatorsCommand[actuatorsCommand.mapNameToIndex(steeringCmd->getName())]);
-
-            base::Waypoint wheelOut, wheelSteeringOut;
-            auto pos = jointActuator->getPosition();
-            wheelOut.position.x() = pos.x();
-            wheelOut.position.y() = pos.y();
-            wheelOut.position.z() = 0.;
-            wheelOut.heading = jointState.position;
-            wheelSteeringOut.position = wheelOut.position;
-            wheelSteeringOut.heading = (steeringJointState.speed > 0) ? 0 : M_PI;
-            wheelsDebug.push_back(wheelOut);
-            wheelsDebug.push_back(wheelSteeringOut);
-        }
-
-        _wheel_debug.write(wheelsDebug);
-        
-        base::Waypoint ackermannTurningCenter;
-        auto turningCenter = motionControlDispatcher->getAckermannController()->getTurningCenter();
-        ackermannTurningCenter.position.x() = turningCenter.x();
-        ackermannTurningCenter.position.y() = turningCenter.y();
-        ackermannTurningCenter.position.z() = 0.;
-        _ackermann_turning_center.write(ackermannTurningCenter);
     }
+        
+    motionControlDispatcher->compute(motionCommand, actuatorsCommand, actuatorsFeedback);
+    _actuators_command.write(actuatorsCommand);
+    
+    switch (motionControlDispatcher->getCurrentMode())
+    {
+        case ModeAckermann:
+            state(EXEC_ACKERMANN);
+            break;
+        
+        case ModeTurnOnSpot:
+            state(EXEC_TURN_ON_SPOT);
+            break;
+            
+        case ModeLateral:
+            state(EXEC_LATERAL);
+            break;
+            
+        default:
+            state(IDLE);
+            break;
+    }
+    
+    switch (motionControlDispatcher->getStatus())
+    {
+        case TooFast:
+            state(TOO_FAST);
+            break;
+            
+        case NeedsToWaitForTurn:
+            state(NEEDS_WAIT_FOR_TURN);
+            break;
+            
+        default:
+            break;
+    }
+    
+    std::vector<base::Waypoint> wheelsDebug;
+    for (auto jointActuator: controllerBase->getJointActuators())
+    {
+        JointCmd* positionCmd = jointActuator->getJointCmdForType(JointCmdType::Position);
+        JointCmd* steeringCmd = jointActuator->getJointCmdForType(JointCmdType::Speed);
+
+        base::JointState &jointState(actuatorsCommand[actuatorsCommand.mapNameToIndex(positionCmd->getName())]);
+        base::JointState &steeringJointState(actuatorsCommand[actuatorsCommand.mapNameToIndex(steeringCmd->getName())]);
+
+        base::Waypoint wheelOut, wheelSteeringOut;
+        auto pos = jointActuator->getPosition();
+        wheelOut.position.x() = pos.x();
+        wheelOut.position.y() = pos.y();
+        wheelOut.position.z() = 0.;
+        wheelOut.heading = jointState.position;
+        wheelSteeringOut.position = wheelOut.position;
+        wheelSteeringOut.heading = (steeringJointState.speed > 0) ? 0 : M_PI;
+        wheelsDebug.push_back(wheelOut);
+        wheelsDebug.push_back(wheelSteeringOut);
+    }
+
+    _wheel_debug.write(wheelsDebug);
+    
+    base::Waypoint ackermannTurningCenter;
+    auto turningCenter = motionControlDispatcher->getAckermannController()->getTurningCenter();
+    ackermannTurningCenter.position.x() = turningCenter.x();
+    ackermannTurningCenter.position.y() = turningCenter.y();
+    ackermannTurningCenter.position.z() = 0.;
+    _ackermann_turning_center.write(ackermannTurningCenter);
 }
 
 void Task::errorHook()
