@@ -105,7 +105,7 @@ void Task::updateHook()
         }
     }
     
-    trajectory_follower::Motion2D motionCommand;
+    base::commands::Motion2D motionCommand;
     
     if(_motion_command.read(motionCommand) == RTT::NewData){   
         lastCommand = motionCommand;
