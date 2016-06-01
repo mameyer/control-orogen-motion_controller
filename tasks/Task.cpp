@@ -78,6 +78,10 @@ bool Task::configureHook()
     {
         motionControlDispatcher->setAckermannRatio(_ackermann_ratio.get());
     }
+    
+    motionControlDispatcher->setTurningAngleThreshold(_turning_angle_threshold.get());
+    motionControlDispatcher->setJointsFeedbackTurningThreshold(_joints_feedback_turning_threshold.get());
+    motionControlDispatcher->getAckermannController()->setRotationMaxEpsilon(_rotation_max_epsilon.get());
 
     return true;
 }

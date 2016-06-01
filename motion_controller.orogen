@@ -22,6 +22,12 @@ task_context "Task" do
     property('max_rotation_angle', 'double')
     
     property('use_joints_feedback', 'bool')
+    
+    property('turning_angle_threshold', 'double', 0.005)
+    
+    property('joints_feedback_turning_threshold', 'double', 0.1)
+    
+    property('rotation_max_epsilon', 'double', 0.05)
 
     input_port('motion_command', '/base/commands/Motion2D').
         doc("Drive command that should steer the robot to the target pose")
