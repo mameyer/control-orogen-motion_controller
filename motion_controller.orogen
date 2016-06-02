@@ -19,7 +19,7 @@ task_context "Task" do
     
     property('ackermann_ratio', 'double')
     
-    property('max_rotation_angle', 'double')
+    #property('max_rotation_angle', 'double')
     
     property('use_joints_feedback', 'bool')
     
@@ -27,7 +27,7 @@ task_context "Task" do
     
     property('joints_feedback_turning_threshold', 'double', 0.1)
     
-    property('rotation_max_epsilon', 'double', 0.05)
+    #property('rotation_max_epsilon', 'double', 0.05)
 
     input_port('motion_command', '/base/commands/Motion2D').
         doc("Drive command that should steer the robot to the target pose")
