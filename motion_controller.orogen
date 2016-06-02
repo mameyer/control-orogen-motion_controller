@@ -19,7 +19,7 @@ task_context "Task" do
     
     property('ackermann_ratio', 'double')
     
-    #property('max_rotation_angle', 'double')
+    property('max_rotation_angle', 'double')
     
     property('use_joints_feedback', 'bool')
     

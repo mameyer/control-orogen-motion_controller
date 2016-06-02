@@ -35,13 +35,13 @@ bool Task::configureHook()
 
     controllerBase = new ControllerBase();
     
-    /*double maxRotationAngle =  _max_rotation_angle.get();
+    double maxRotationAngle =  _max_rotation_angle.get();
     if (maxRotationAngle < 0.)
     {
-        maxRotationAngle = M_PI;
+        maxRotationAngle = M_PI/2;
     }
     
-    controllerBase->setMaxRotationAngle(maxRotationAngle);*/
+    controllerBase->setMaxRotationAngle(maxRotationAngle);
     
 
     std::cout << "actuators.. " << std::endl;
