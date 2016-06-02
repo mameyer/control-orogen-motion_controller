@@ -35,13 +35,14 @@ bool Task::configureHook()
 
     controllerBase = new ControllerBase();
     
-    double maxRotationAngle =  _max_rotation_angle.get();
+    /*double maxRotationAngle =  _max_rotation_angle.get();
     if (maxRotationAngle < 0.)
     {
         maxRotationAngle = M_PI;
     }
     
-    controllerBase->setMaxRotationAngle(maxRotationAngle);
+    controllerBase->setMaxRotationAngle(maxRotationAngle);*/
+    
 
     std::cout << "actuators.. " << std::endl;
     for (auto actuator: _actuators.get())
@@ -79,9 +80,9 @@ bool Task::configureHook()
         motionControlDispatcher->setAckermannRatio(_ackermann_ratio.get());
     }
     
-    motionControlDispatcher->setTurningAngleThreshold(_turning_angle_threshold.get());
+    //motionControlDispatcher->setTurningAngleThreshold(_turning_angle_threshold.get());
     motionControlDispatcher->setJointsFeedbackTurningThreshold(_joints_feedback_turning_threshold.get());
-    motionControlDispatcher->getAckermannController()->setRotationMaxEpsilon(_rotation_max_epsilon.get());
+    //motionControlDispatcher->getAckermannController()->setRotationMaxEpsilon(_rotation_max_epsilon.get());
 
     return true;
 }
