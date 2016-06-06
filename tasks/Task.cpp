@@ -80,9 +80,8 @@ bool Task::configureHook()
         motionControlDispatcher->setAckermannRatio(_ackermann_ratio.get());
     }
     
-    //motionControlDispatcher->setTurningAngleThreshold(_turning_angle_threshold.get());
+    motionControlDispatcher->setTurningAngleThreshold(_turning_angle_threshold.get());
     motionControlDispatcher->setJointsFeedbackTurningThreshold(_joints_feedback_turning_threshold.get());
-    //motionControlDispatcher->getAckermannController()->setRotationMaxEpsilon(_rotation_max_epsilon.get());
 
     return true;
 }
@@ -131,10 +130,6 @@ void Task::updateHook()
             state(EXEC_ACKERMANN);
             break;
         
-        case ModeTurnOnSpot:
-            state(EXEC_TURN_ON_SPOT);
-            break;
-            
         case ModeLateral:
             state(EXEC_LATERAL);
             break;
@@ -154,6 +149,9 @@ void Task::updateHook()
             state(NEEDS_WAIT_FOR_TURN);
             break;
             
+        case Idle:
+            state(IDLE);
+            break;
         default:
             break;
     }
@@ -176,7 +174,7 @@ void Task::updateHook()
         wheelSteeringOut.position = wheelOut.position;
         wheelSteeringOut.heading = (steeringJointState.speed > 0) ? 0 : M_PI;
         wheelsDebug.push_back(wheelOut);
-        wheelsDebug.push_back(wheelSteeringOut);
+        //wheelsDebug.push_back(wheelSteeringOut);
     }
 
     _wheel_debug.write(wheelsDebug);
