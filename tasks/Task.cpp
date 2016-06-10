@@ -156,6 +156,9 @@ void Task::updateHook()
             break;
     }
     
+    
+    //Debug-section
+    
     std::vector<base::Waypoint> wheelsDebug;
     for (auto jointActuator: controllerBase->getJointActuators())
     {
@@ -165,16 +168,13 @@ void Task::updateHook()
         base::JointState &jointState(actuatorsCommand[actuatorsCommand.mapNameToIndex(positionCmd->getName())]);
         base::JointState &steeringJointState(actuatorsCommand[actuatorsCommand.mapNameToIndex(steeringCmd->getName())]);
 
-        base::Waypoint wheelOut, wheelSteeringOut;
+        base::Waypoint wheelOut;
         auto pos = jointActuator->getPosition();
         wheelOut.position.x() = pos.x();
         wheelOut.position.y() = pos.y();
-        wheelOut.position.z() = 0.;
+        wheelOut.position.z() = (steeringJointState.speed > 0) ? 1 : 0;
         wheelOut.heading = jointState.position;
-        wheelSteeringOut.position = wheelOut.position;
-        wheelSteeringOut.heading = (steeringJointState.speed > 0) ? 0 : M_PI;
         wheelsDebug.push_back(wheelOut);
-        //wheelsDebug.push_back(wheelSteeringOut);
     }
 
     _wheel_debug.write(wheelsDebug);
@@ -185,6 +185,8 @@ void Task::updateHook()
     ackermannTurningCenter.position.y() = turningCenter.y();
     ackermannTurningCenter.position.z() = 0.;
     _ackermann_turning_center.write(ackermannTurningCenter);
+    
+    _input_debug.write(motionCommand);
 }
 
 void Task::errorHook()

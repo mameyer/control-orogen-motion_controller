@@ -42,6 +42,8 @@ task_context "Task" do
     output_port('wheel_debug', 'std/vector</base/Waypoint>')
     
     output_port('ackermann_turning_center', '/base/Waypoint')
+    
+    output_port('input_debug', '/base/commands/Motion2D')
 
     periodic 0.01
     
