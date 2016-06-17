@@ -44,7 +44,7 @@ bool Task::configureHook()
     controllerBase->setMaxRotationAngle(maxRotationAngle);
     
 
-    std::cout << "actuators.. " << std::endl;
+    //std::cout << "actuators.. " << std::endl;
     for (auto actuator: _actuators.get())
     {
         base::Vector2d actuatorPos = actuator.position;
@@ -53,19 +53,19 @@ bool Task::configureHook()
             actuatorPos = geometry.getWheelPosition(actuator.type);
         }
         jointActuators[actuator.name] = controllerBase->addJointActuator(actuatorPos);
-        std::cout << "actuator: " << actuator.name << ", position: " << jointActuators[actuator.name]->getPosition().transpose() << std::endl;
+        //std::cout << "actuator: " << actuator.name << ", position: " << jointActuators[actuator.name]->getPosition().transpose() << std::endl;
     }
 
-    std::cout << "jointCommands.. " << std::endl;
+    //std::cout << "jointCommands.. " << std::endl;
     for (auto jointCommand: _joint_commands.get())
     {
-        std::cout << "jointCommand: " << jointCommand.name << std::endl;
+        //std::cout << "jointCommand: " << jointCommand.name << std::endl;
         JointCmd *jointCmd(controllerBase->addJointCmd(jointCommand.name, jointCommand.type));
-        std::cout << "jointActuators.find: " << jointCommand.actuator << std::endl;
+        //std::cout << "jointActuators.find: " << jointCommand.actuator << std::endl;
         auto jointActuator = jointActuators.find(jointCommand.actuator);
         if (jointActuator != jointActuators.end())
         {
-            std::cout << "jointCmd " << jointCmd->getName() << " register at: " << jointActuator->first << std::endl;
+            //std::cout << "jointCmd " << jointCmd->getName() << " register at: " << jointActuator->first << std::endl;
             jointCmd->registerAt(jointActuator->second);
         }
     }
@@ -162,28 +162,28 @@ void Task::updateHook()
     std::vector<base::Waypoint> wheelsDebug;
     for (auto jointActuator: controllerBase->getJointActuators())
     {
-        JointCmd* positionCmd = jointActuator->getJointCmdForType(JointCmdType::Position);
-        JointCmd* steeringCmd = jointActuator->getJointCmdForType(JointCmdType::Speed);
+        JointCmd* positionCmd = jointActuator->getJointCmdForType(JointCmdType::Speed);
+        JointCmd* steeringCmd = jointActuator->getJointCmdForType(JointCmdType::Position);
 
         base::JointState &jointState(actuatorsCommand[actuatorsCommand.mapNameToIndex(positionCmd->getName())]);
         base::JointState &steeringJointState(actuatorsCommand[actuatorsCommand.mapNameToIndex(steeringCmd->getName())]);
 
         base::Waypoint wheelOut;
-        auto pos = jointActuator->getPosition();
+        auto pos = jointActuator->getPrecisePosition(_geometry.get().scrubRadius, steeringJointState.position);
         wheelOut.position.x() = pos.x();
         wheelOut.position.y() = pos.y();
-        wheelOut.position.z() = (steeringJointState.speed > 0) ? 1 : 0;
-        wheelOut.heading = jointState.position;
+        wheelOut.position.z() = 0;
+        wheelOut.heading = (jointState.speed >= 0) ? steeringJointState.position : steeringJointState.position + M_PI;
         wheelsDebug.push_back(wheelOut);
     }
 
     _wheel_debug.write(wheelsDebug);
     
-    base::Waypoint ackermannTurningCenter;
+    base::samples::RigidBodyState ackermannTurningCenter;
     auto turningCenter = motionControlDispatcher->getAckermannController()->getTurningCenter();
     ackermannTurningCenter.position.x() = turningCenter.x();
     ackermannTurningCenter.position.y() = turningCenter.y();
-    ackermannTurningCenter.position.z() = 0.;
+    ackermannTurningCenter.position.z() = motionControlDispatcher->getCurrentMode() == motion_controller::ModeAckermann ? 0. : nan("Absicht");
     _ackermann_turning_center.write(ackermannTurningCenter);
     
     _input_debug.write(motionCommand);

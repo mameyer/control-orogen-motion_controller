@@ -6,6 +6,7 @@
 #include "motion_controller/TaskBase.hpp"
 #include "motion_controller/Controller.hpp"
 #include <motion_controller/Dispatcher.hpp>
+#include <base/samples/RigidBodyState.hpp>
 
 namespace motion_controller {
 
